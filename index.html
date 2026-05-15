@@ -689,8 +689,7 @@ document.getElementById('my-email').addEventListener('keydown',e=>{if(e.key==='E
 function toggleHint(){hintOn=!hintOn;document.getElementById('hint-sw').classList.toggle('on',hintOn);document.getElementById('hint-wrap').style.display=hintOn?'block':'none';}
 document.getElementById('hint-txt').addEventListener('input',function(){document.getElementById('char-c').textContent=this.value.length+' / 120';});
 
-function rid(a,b){return[a.toLowerCase().trim(),b.toLowerCase().trim()].sort().join('__');}
-
+function rid(a,b){return[a.toLowerCase().trim(),b.toLowerCase().trim()].sort().join('__').replace(/\./g,'-').replace(/@/g,'_at_');}
 async function sendVeil(){
   const to=document.getElementById('to-email').value.trim().toLowerCase();
   if(!to){alert('Enter their email.');return;}
