@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Veil — You've been Veiled.</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:#09090f; --bg2:#111119; --bg3:#161622;
+  --rose:#c9a4b2; --rose-dim:#8a6070;
+  --purple:#7b5ea7; --purple-dim:#4a3666; --purple-light:#b49fd4;
+  --fog:#a8a8c0; --text:#ede8f0; --muted:#7a7490;
+  --border:rgba(200,180,220,0.12); --bh:rgba(200,180,220,0.2);
+  --green:#90b890;
+}
+html { scroll-behavior:smooth; }
+body { background:var(--bg); color:var(--text); font-family:'Jost',sans-serif; font-weight:300; overflow-x:hidden; }
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:998; opacity:.4;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* DIVIDERS */
+.sec-divider { width:100%; height:1px; background:var(--border); }
+.sec-label { text-align:center; padding:3.5rem 2rem 0; }
+.sec-label-text { font-size:.6rem; letter-spacing:.35em; text-transform:uppercase; color:var(--muted); display:inline-block; border:1px solid var(--border); padding:.4rem 1.2rem; }
+
+/* NAV */
+nav { position:fixed; top:0; width:100%; z-index:100; transition:all .4s; background:rgba(9,9,15,.95); border-bottom:1px solid var(--border); padding:.9rem 2rem; display:flex; flex-direction:row; justify-content:space-between; align-items:center; gap:1rem; }
+nav.scrolled { backdrop-filter:blur(20px); }
+.nav-logo { display:flex; flex-direction:row; align-items:center; gap:.6rem; text-decoration:none; cursor:pointer; flex-shrink:0; }
+.nav-logo-text { font-family:'Cormorant Garamond',serif; font-size:1.4rem; font-weight:400; letter-spacing:.12em; color:var(--text); }
+
+/* HERO */
+.hero { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:9rem 2rem 6rem; position:relative; overflow:hidden; }
+.orb { position:absolute; border-radius:50%; filter:blur(90px); pointer-events:none; }
+.o1 { width:600px; height:600px; background:radial-gradient(circle,rgba(123,94,167,.15) 0%,transparent 70%); top:-150px; left:-180px; animation:drift1 22s ease-in-out infinite; }
+.o2 { width:450px; height:450px; background:radial-gradient(circle,rgba(201,164,178,.1) 0%,transparent 70%); bottom:-80px; right:-120px; animation:drift2 28s ease-in-out infinite; }
+.o3 { width:300px; height:300px; background:radial-gradient(circle,rgba(123,94,167,.08) 0%,transparent 70%); top:50%; left:50%; transform:translate(-50%,-50%); animation:pulse-orb 9s ease-in-out infinite; }
+@keyframes drift1 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(60px,40px)} 66%{transform:translate(-30px,70px)} }
+@keyframes drift2 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-50px,-30px)} 66%{transform:translate(40px,-60px)} }
+@keyframes pulse-orb { 0%,100%{opacity:.4;transform:translate(-50%,-50%) scale(1)} 50%{opacity:.9;transform:translate(-50%,-50%) scale(1.4)} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes globe-pulse { 0%,100%{opacity:.8} 50%{opacity:1} }
+.reveal { opacity:0; transform:translateY(28px); transition:opacity .9s ease,transform .9s ease; }
+.reveal.visible { opacity:1; transform:none; }
+
+.hero-eyebrow { font-size:.6rem; letter-spacing:.28em; text-transform:uppercase; color:var(--rose-dim); margin-bottom:1.5rem; opacity:0; animation:fadeUp .9s .2s forwards; }
+.hero-title { font-family:'Cormorant Garamond',serif; font-size:clamp(4rem,10vw,9.5rem); font-weight:300; line-height:.9; letter-spacing:-.02em; opacity:0; animation:fadeUp 1s .4s forwards; }
+.hero-title em { font-style:italic; color:var(--rose); }
+.hero-tag { font-size:clamp(.85rem,1.8vw,1rem); font-weight:200; color:var(--fog); margin-top:2rem; letter-spacing:.05em; opacity:0; animation:fadeUp 1s .6s forwards; max-width:540px; line-height:1.65; }
+.hero-btns { display:flex; gap:1rem; margin-top:2.5rem; justify-content:center; flex-wrap:wrap; opacity:0; animation:fadeUp 1s .8s forwards; }
+.btn-hero { background:var(--rose); color:#0d0814; border:none; padding:.9rem 2.4rem; font-family:'Jost',sans-serif; font-size:.7rem; font-weight:400; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:all .3s; text-decoration:none; display:inline-block; }
+.btn-hero:hover { background:#ddbece; transform:translateY(-2px); }
+.btn-hero-ghost { background:transparent; color:var(--muted); border:1px solid var(--bh); padding:.9rem 2.4rem; font-family:'Jost',sans-serif; font-size:.7rem; font-weight:400; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:all .3s; text-decoration:none; display:inline-block; }
+.btn-hero-ghost:hover { border-color:var(--rose-dim); color:var(--rose); }
+.pills { display:flex; gap:.5rem; flex-wrap:wrap; justify-content:center; margin-top:1.8rem; opacity:0; animation:fadeUp 1s 1s forwards; }
+.pill { font-size:.68rem; color:var(--fog); border:1px solid var(--border); padding:.35rem .85rem; letter-spacing:.04em; }
+.hero-origin { font-size:.6rem; color:var(--muted); margin-top:1.5rem; letter-spacing:.12em; opacity:0; animation:fadeUp 1s 1.1s forwards; }
+
+/* STAT */
+.stat-section { padding:5rem 2rem; text-align:center; background:rgba(123,94,167,.04); }
+.stat-headline { font-family:'Cormorant Garamond',serif; font-size:clamp(2rem,5vw,3.5rem); font-weight:400; color:var(--text); line-height:1.2; margin-bottom:1rem; }
+.stat-headline span { color:var(--purple-light); }
+.stat-sub { font-size:.9rem; color:var(--fog); max-width:540px; margin:0 auto; line-height:1.75; font-weight:200; }
+
+/* AD ZONES */
+.ad-zone { width:100%; max-width:1100px; margin:0 auto; }
+
+/* SECTIONS */
+.section { padding:5rem 2rem; max-width:1100px; margin:0 auto; }
+.section-h { font-family:'Cormorant Garamond',serif; font-size:clamp(2rem,5vw,3.5rem); font-weight:300; line-height:1.1; margin-bottom:1.2rem; }
+.section-h em { font-style:italic; color:var(--rose); }
+.section-p { font-size:.88rem; color:var(--fog); line-height:1.85; max-width:520px; font-weight:200; }
+
+/* INFO BOX */
+.info-box { background:var(--bg2); border:1px solid var(--border); padding:1.6rem 2rem; margin-top:1.5rem; font-size:.84rem; color:var(--fog); line-height:1.85; }
+.info-box strong { color:var(--rose); font-weight:400; }
+
+/* STORY BOX */
+.story-box { background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--purple-dim); padding:2rem 2.5rem; margin-top:2rem; }
+.story-box p { font-size:.86rem; color:var(--fog); line-height:1.95; margin-bottom:1rem; }
+.story-box p:last-child { margin-bottom:0; color:var(--rose); font-style:italic; }
+
+/* USE CASES */
+.use-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); margin-top:3rem; }
+.use-card { background:var(--bg); padding:2.2rem 1.6rem; border-top:2px solid transparent; transition:all .4s; }
+.use-card:hover { background:var(--bg2); border-top-color:var(--purple-dim); }
+.use-num { font-family:'Cormorant Garamond',serif; font-size:2.8rem; font-weight:300; color:rgba(123,94,167,.18); line-height:1; margin-bottom:.9rem; transition:color .4s; }
+.use-card:hover .use-num { color:var(--purple-dim); }
+.use-title { font-family:'Cormorant Garamond',serif; font-size:1.25rem; font-weight:400; margin-bottom:.5rem; }
+.use-body { font-size:.76rem; color:var(--muted); line-height:1.8; }
+
+/* HOW IT WORKS */
+.steps { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border); margin-top:3rem; }
+.step { background:var(--bg); padding:2rem 1.6rem; transition:background .4s; }
+.step:hover { background:var(--bg2); }
+.step-n { font-family:'Cormorant Garamond',serif; font-size:2.8rem; font-weight:300; color:var(--border); line-height:1; margin-bottom:.8rem; transition:color .4s; }
+.step:hover .step-n { color:var(--purple-dim); }
+.step-title { font-family:'Cormorant Garamond',serif; font-size:1.2rem; margin-bottom:.5rem; }
+.step-body { font-size:.76rem; color:var(--muted); line-height:1.8; }
+
+/* GLOBE */
+.globe-layout { display:flex; align-items:center; gap:5rem; flex-wrap:wrap; padding:5rem 2rem; max-width:1100px; margin:0 auto; }
+.globe-text { flex:1; min-width:280px; }
+.globe-title { font-family:'Cormorant Garamond',serif; font-size:clamp(1.8rem,4vw,2.8rem); font-weight:300; line-height:1.2; margin-bottom:1.2rem; }
+.globe-title em { font-style:italic; color:var(--purple-light); }
+
+/* ABOUT */
+.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:start; }
+.founder-attr { font-size:.68rem; color:var(--muted); margin-top:1.2rem; letter-spacing:.08em; }
+.founder-attr strong { color:var(--rose-dim); font-weight:400; }
+.by-tag { display:inline-block; font-size:.6rem; letter-spacing:.25em; text-transform:uppercase; color:var(--purple-light); border:1px solid rgba(123,94,167,.3); padding:.4rem 1rem; margin-top:.8rem; }
+
+/* POLICY */
+.policy-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; background:var(--bg2); border:1px solid var(--border); padding:3rem; }
+.policy-title { font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:300; margin-bottom:.8rem; }
+.policy-body { font-size:.82rem; color:var(--muted); line-height:1.85; }
+.policy-rule { display:flex; align-items:flex-start; gap:.8rem; margin-top:1rem; font-size:.78rem; color:var(--fog); line-height:1.7; }
+.policy-dot { width:6px; height:6px; border-radius:50%; background:var(--rose-dim); flex-shrink:0; margin-top:.4rem; }
+
+/* BIG QUOTE */
+.big-q-wrap { text-align:center; padding:5.5rem 2rem; position:relative; overflow:hidden; }
+.big-q-wrap::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center,rgba(123,94,167,.07) 0%,transparent 60%); pointer-events:none; }
+.big-q { font-family:'Cormorant Garamond',serif; font-size:clamp(1.5rem,3.5vw,2.5rem); font-weight:300; font-style:italic; max-width:760px; margin:0 auto; line-height:1.45; }
+.big-q em { color:var(--purple-light); font-style:normal; }
+
+/* TEAM */
+.team-grid { display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:start; }
+.team-roles { display:flex; flex-direction:column; gap:.8rem; margin-top:1.5rem; }
+.team-role { padding:.8rem 1rem; background:var(--bg2); border:1px solid var(--border); font-size:.78rem; color:var(--muted); display:flex; align-items:center; gap:.8rem; transition:all .3s; }
+.team-role:hover { border-color:var(--purple-dim); color:var(--text); }
+.role-dot { width:6px; height:6px; border-radius:50%; background:var(--purple-dim); flex-shrink:0; }
+.contact-card { background:var(--bg2); border:1px solid var(--bh); padding:1.8rem; margin-bottom:1.2rem; }
+.contact-label { font-size:.58rem; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); margin-bottom:.8rem; display:block; }
+.contact-qs { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1rem; }
+.contact-q { font-family:'Cormorant Garamond',serif; font-size:1.05rem; font-weight:300; color:var(--fog); }
+.contact-email { display:block; font-size:.82rem; color:var(--rose); letter-spacing:.04em; text-decoration:none; border-top:1px solid var(--border); padding-top:.85rem; margin-top:.8rem; transition:color .3s; }
+.contact-email:hover { color:#ddbece; }
+
+/* FOOTER */
+footer { padding:3rem; }
+.footer-top { display:flex; align-items:center; gap:1.5rem; margin-bottom:2rem; }
+.footer-logo-wrap { display:flex; align-items:center; gap:.7rem; flex-shrink:0; }
+.footer-logo-text { font-family:'Cormorant Garamond',serif; font-size:1.2rem; color:var(--muted); letter-spacing:.12em; }
+.footer-links { display:flex; gap:1.5rem; flex-wrap:wrap; }
+.footer-links a { font-size:.72rem; color:var(--muted); text-decoration:none; letter-spacing:.1em; text-transform:uppercase; transition:color .3s; }
+.footer-links a:hover { color:var(--rose); }
+.footer-legal { font-size:.53rem; color:rgba(122,116,144,.42); line-height:1.8; border-top:1px solid var(--border); padding-top:1.5rem; max-width:900px; }
+
+/* PASSWORD MODAL */
+.pw-overlay { display:none; position:fixed; inset:0; background:rgba(9,9,15,.93); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(10px); }
+.pw-overlay.show { display:flex; }
+.pw-box { background:var(--bg2); border:1px solid var(--bh); padding:2.5rem; width:320px; text-align:center; }
+.pw-title { font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:300; margin-bottom:.5rem; }
+.pw-sub { font-size:.72rem; color:var(--muted); margin-bottom:1.5rem; }
+.pw-input { width:100%; background:var(--bg); border:1px solid var(--bh); padding:.85rem 1rem; color:var(--text); font-family:'Jost',sans-serif; font-size:.9rem; outline:none; text-align:center; letter-spacing:.15em; margin-bottom:1rem; border-radius:0; }
+.pw-input:focus { border-color:var(--rose-dim); }
+.pw-btn { width:100%; background:var(--rose); color:#0d0814; border:none; padding:.85rem; font-family:'Jost',sans-serif; font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; transition:background .3s; }
+.pw-btn:hover { background:#ddbece; }
+.pw-error { font-size:.68rem; color:#e07070; margin-top:.6rem; display:none; }
+.pw-close { display:block; margin-top:.8rem; font-size:.62rem; color:var(--muted); cursor:pointer; background:none; border:none; font-family:'Jost',sans-serif; }
+
+/* DASHBOARD */
+.dash-overlay { display:none; position:fixed; inset:0; background:var(--bg); z-index:9998; overflow-y:auto; }
+.dash-overlay.show { display:block; }
+.dash-wrap { max-width:800px; margin:0 auto; padding:4rem 2rem; }
+.dash-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:3rem; }
+.dash-title { font-family:'Cormorant Garamond',serif; font-size:2.5rem; font-weight:300; }
+.dash-close { background:none; border:1px solid var(--bh); color:var(--muted); font-family:'Jost',sans-serif; font-size:.65rem; letter-spacing:.15em; text-transform:uppercase; padding:.5rem 1rem; cursor:pointer; transition:all .3s; }
+.dash-close:hover { border-color:var(--rose-dim); color:var(--rose); }
+.stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:3rem; }
+.stat-card { background:var(--bg2); border:1px solid var(--border); padding:1.8rem; text-align:center; }
+.stat-num { font-family:'Cormorant Garamond',serif; font-size:3rem; font-weight:300; color:var(--rose); display:block; }
+.stat-label { font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-top:.3rem; display:block; }
+.veil-log { background:var(--bg2); border:1px solid var(--border); padding:.85rem 1.1rem; margin-bottom:.5rem; display:flex; justify-content:space-between; align-items:center; font-size:.74rem; flex-wrap:wrap; gap:.5rem; }
+.status-matched { color:var(--green); font-size:.6rem; text-transform:uppercase; }
+.status-pending { color:var(--rose-dim); font-size:.6rem; text-transform:uppercase; }
+.dash-sec-title { font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:300; margin-bottom:1rem; color:var(--fog); }
+.dash-empty { text-align:center; padding:3rem; color:var(--muted); font-size:.78rem; }
+
+/* APP */
+#landing { display:block; }
+#veil-app { display:none; min-height:100vh; flex-direction:column; align-items:center; }
+.app-wrap { width:100%; max-width:500px; min-height:100vh; display:flex; flex-direction:column; padding:0 1.5rem; }
+.app-header { display:flex; align-items:center; justify-content:space-between; padding:1.3rem 0; border-bottom:1px solid var(--border); margin-bottom:2rem; flex-shrink:0; }
+.app-logo-wrap { display:flex; align-items:center; gap:.6rem; }
+.app-logo-text { font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:400; letter-spacing:.12em; }
+.app-hdr-right { display:flex; align-items:center; gap:.8rem; }
+.user-pill { font-size:.6rem; color:var(--rose-dim); }
+#app-back { display:none; background:none; border:1px solid var(--border); color:var(--muted); font-family:'Jost',sans-serif; font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; padding:.35rem .8rem; transition:all .3s; }
+#app-back:hover { border-color:var(--rose-dim); color:var(--rose); }
+.close-app { background:none; border:none; color:var(--muted); font-size:.65rem; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; font-family:'Jost',sans-serif; }
+.screen { display:none; flex:1; flex-direction:column; padding-bottom:3rem; }
+.screen.active { display:flex; }
+.s-title { font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:300; margin-bottom:.4rem; }
+.s-sub { font-size:.76rem; color:var(--muted); line-height:1.7; margin-bottom:1.6rem; }
+.label { display:block; font-size:.6rem; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); margin-bottom:.5rem; }
+.inp { width:100%; background:var(--bg2); border:1px solid var(--bh); padding:.85rem 1rem; color:var(--text); font-family:'Jost',sans-serif; font-size:.88rem; font-weight:300; outline:none; transition:border-color .3s; border-radius:0; -webkit-appearance:none; }
+.inp:focus { border-color:var(--rose-dim); }
+.inp::placeholder { color:var(--muted); }
+textarea.inp { resize:none; height:80px; line-height:1.6; }
+.inp-group { margin-bottom:1rem; }
+.char-count { font-size:.58rem; color:var(--muted); text-align:right; margin-top:.3rem; }
+.btn { display:block; width:100%; padding:.9rem; font-family:'Jost',sans-serif; font-size:.7rem; font-weight:400; letter-spacing:.2em; text-transform:uppercase; cursor:pointer; border:none; transition:all .3s; }
+.btn-rose { background:var(--rose); color:#0d0814; }
+.btn-rose:hover { background:#ddbece; }
+.btn-out { background:transparent; color:var(--muted); border:1px solid var(--bh); margin-top:.8rem; }
+.btn-out:hover { border-color:var(--rose-dim); color:var(--rose); }
+.btn-sm { display:inline-block; width:auto; padding:.45rem 1rem; font-size:.6rem; }
+.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:.9rem 1rem; background:var(--bg2); border:1px solid var(--bh); margin-bottom:1rem; cursor:pointer; user-select:none; transition:border-color .3s; }
+.toggle-row:hover { border-color:var(--rose-dim); }
+.toggle-label { font-size:.78rem; }
+.toggle-sub { font-size:.63rem; color:var(--muted); display:block; margin-top:2px; }
+.switch { width:38px; height:22px; background:var(--bg3); border-radius:11px; position:relative; border:1px solid var(--bh); transition:all .3s; flex-shrink:0; }
+.switch.on { background:var(--rose-dim); border-color:var(--rose); }
+.knob { width:16px; height:16px; border-radius:50%; background:var(--muted); position:absolute; top:2px; left:2px; transition:all .3s; }
+.switch.on .knob { left:18px; background:var(--text); }
+.welcome-wrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:3rem 0; }
+.w-title { font-family:'Cormorant Garamond',serif; font-size:clamp(3.5rem,16vw,5.5rem); font-weight:300; line-height:.9; letter-spacing:-.02em; margin-bottom:1.2rem; }
+.w-title em { font-style:italic; color:var(--rose); }
+.w-sub { font-size:.76rem; color:var(--muted); line-height:1.7; margin-bottom:2.5rem; max-width:300px; }
+.w-form { width:100%; max-width:340px; }
+.card-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:2rem; }
+.home-card { background:var(--bg2); border:1px solid var(--bh); padding:1.8rem 1.2rem; cursor:pointer; text-align:center; transition:all .3s; position:relative; }
+.home-card:hover { border-color:var(--rose-dim); background:rgba(200,160,180,.05); }
+.card-icon { font-size:1.6rem; margin-bottom:.7rem; }
+.card-title { font-family:'Cormorant Garamond',serif; font-size:1.2rem; margin-bottom:.3rem; }
+.card-sub { font-size:.63rem; color:var(--muted); line-height:1.5; }
+.notif-badge { position:absolute; top:-7px; right:-7px; width:20px; height:20px; border-radius:50%; background:var(--rose); color:#0d0814; font-size:.6rem; display:flex; align-items:center; justify-content:center; }
+.divider { height:1px; background:var(--border); margin:1.5rem 0; }
+.codename-banner { background:rgba(123,94,167,.08); border:1px solid rgba(123,94,167,.2); padding:.8rem 1rem; margin-bottom:1.2rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.5rem; }
+.cn-label { font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--purple-dim); }
+.cn-value { font-family:'Cormorant Garamond',serif; font-size:1.1rem; color:var(--purple-light); }
+.cn-to { font-size:.6rem; color:var(--muted); }
+.veil-item { background:var(--bg2); border:1px solid var(--bh); padding:1.1rem; margin-bottom:.8rem; }
+.veil-item:hover { border-color:var(--rose-dim); }
+.item-row { display:flex; align-items:center; gap:.6rem; margin-bottom:.5rem; }
+.sdot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.sdot-p { background:var(--rose); animation:blink 2s infinite; }
+.sdot-m { background:var(--green); }
+.sdot-e { background:var(--muted); }
+.item-cn { font-family:'Cormorant Garamond',serif; font-size:1rem; color:var(--purple-light); margin-bottom:.3rem; }
+.item-title { font-size:.8rem; flex:1; }
+.item-time { font-size:.6rem; color:var(--muted); }
+.hint-block { font-size:.74rem; color:var(--fog); font-style:italic; line-height:1.6; padding:.5rem .8rem; background:rgba(200,160,180,.06); border-left:2px solid var(--rose-dim); margin-bottom:.7rem; }
+.item-actions { display:flex; gap:.5rem; flex-wrap:wrap; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+.empty { text-align:center; padding:3rem 0; }
+.empty-icon { font-size:1.8rem; opacity:.25; margin-bottom:.8rem; }
+.empty-text { font-size:.76rem; color:var(--muted); line-height:1.8; }
+.success-card { background:rgba(200,160,180,.06); border:1px solid rgba(200,160,180,.15); padding:2rem; text-align:center; }
+.success-icon { font-size:2rem; margin-bottom:.9rem; }
+.success-title { font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:300; margin-bottom:.6rem; }
+.success-body { font-size:.74rem; color:var(--muted); line-height:1.8; }
+.your-cn { font-family:'Cormorant Garamond',serif; font-size:1.4rem; color:var(--purple-light); margin:.8rem 0; }
+.chat-top { display:flex; align-items:center; justify-content:space-between; padding:.9rem 0; border-bottom:1px solid var(--border); flex-shrink:0; }
+.chat-who { font-size:.78rem; color:var(--rose); }
+.chat-clock { font-size:.63rem; color:var(--muted); display:flex; align-items:center; gap:.4rem; }
+.clock-dot { width:5px; height:5px; border-radius:50%; background:var(--green); animation:blink 1.5s infinite; }
+.messages { flex:1; overflow-y:auto; padding:1rem 0; display:flex; flex-direction:column; gap:.7rem; min-height:180px; max-height:calc(100vh - 380px); }
+.msg { max-width:80%; padding:.6rem .9rem; font-size:.82rem; line-height:1.5; border-radius:14px; word-break:break-word; }
+.msg-in { background:rgba(200,160,180,.09); border:1px solid rgba(200,160,180,.13); color:var(--fog); align-self:flex-start; border-bottom-left-radius:3px; }
+.msg-out { background:rgba(200,160,180,.18); color:var(--rose); align-self:flex-end; border-bottom-right-radius:3px; }
+.msg-time { font-size:.52rem; color:rgba(200,160,180,.4); display:block; margin-top:.2rem; }
+.chat-footer { flex-shrink:0; padding-top:.8rem; border-top:1px solid var(--border); }
+.chat-in-row { display:flex; gap:.5rem; align-items:flex-end; margin-top:.6rem; }
+.chat-ta { flex:1; background:var(--bg2); border:1px solid var(--bh); padding:.7rem .9rem; color:var(--text); font-family:'Jost',sans-serif; font-size:.82rem; font-weight:300; outline:none; resize:none; height:42px; transition:border-color .3s; border-radius:0; }
+.chat-ta:focus { border-color:var(--rose-dim); }
+.send-btn { background:var(--rose); color:#0d0814; border:none; width:42px; height:42px; font-size:1rem; cursor:pointer; transition:background .3s; flex-shrink:0; }
+.reveal-strip { background:rgba(200,160,180,.05); border:1px solid rgba(200,160,180,.12); padding:.8rem 1rem; margin-bottom:.6rem; }
+.reveal-strip-top { display:flex; align-items:center; justify-content:space-between; gap:.8rem; flex-wrap:wrap; }
+.reveal-text { font-size:.65rem; color:var(--muted); line-height:1.6; flex:1; }
+.lift-btn { background:none; border:1px solid var(--rose-dim); color:var(--rose); font-family:'Jost',sans-serif; font-size:.58rem; letter-spacing:.15em; text-transform:uppercase; padding:.35rem .85rem; cursor:pointer; transition:all .3s; white-space:nowrap; }
+.lift-btn:hover { background:var(--rose); color:#0d0814; }
+.lift-btn.pressed { background:rgba(200,160,180,.1); border-color:var(--rose); color:var(--rose-dim); cursor:default; }
+.reveal-note { font-size:.6rem; color:var(--muted); margin-top:.5rem; font-style:italic; }
+.revealed-card { background:rgba(200,160,180,.08); border:1px solid rgba(200,160,180,.2); padding:1.2rem; text-align:center; margin-bottom:.7rem; }
+.revealed-label { font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--rose-dim); margin-bottom:.4rem; }
+.revealed-val { font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:300; color:var(--rose); }
+.expired-banner { padding:1rem; background:rgba(120,120,120,.06); border:1px solid rgba(120,120,120,.12); text-align:center; font-size:.73rem; color:var(--muted); line-height:1.7; margin-bottom:.7rem; }
+.no-photo { font-size:.6rem; color:var(--muted); text-align:center; margin-top:.5rem; font-style:italic; }
+
+@media (max-width:900px) {
+  .nav-inner { padding:.8rem 1rem; }
+  .nav-links { gap:.25rem; }
+  .nav-links a { font-size:.5rem; padding:.25rem .45rem; letter-spacing:.04em; }
+  .use-grid { grid-template-columns:1fr 1fr; }
+  .steps { grid-template-columns:1fr; }
+  .about-grid, .team-grid, .policy-grid { grid-template-columns:1fr; gap:2.5rem; }
+  .globe-layout { flex-direction:column; gap:3rem; }
+  .stats-grid { grid-template-columns:1fr; }
+  .story-box { padding:1.5rem; }
+}
+@media (max-width:600px) {
+  .use-grid { grid-template-columns:1fr; }
+  .hero-title { font-size:clamp(3.5rem,14vw,6rem); }
+  .stat-headline { font-size:clamp(1.6rem,7vw,2.5rem); }
+  .section-h { font-size:clamp(1.8rem,7vw,2.8rem); }
+  .pills { gap:.4rem; }
+  .pill { font-size:.62rem; padding:.3rem .7rem; }
+}
+@media (max-width:500px) {
+  .app-wrap { padding:0 1rem; }
+  footer { flex-direction:column; text-align:center; }
+  .footer-top { flex-direction:column; align-items:flex-start; }
+  .footer-links { gap:1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD MODAL -->
+<div class="pw-overlay" id="pw-overlay">
+  <div class="pw-box">
+    <p class="pw-title">Founder Access</p>
+    <p class="pw-sub">Enter your password to view the dashboard.</p>
+    <input class="pw-input" type="password" id="pw-input" placeholder="password" onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="pw-btn" onclick="checkPw()">Enter</button>
+    <p class="pw-error" id="pw-error">Incorrect password.</p>
+    <button class="pw-close" onclick="closePw()">cancel</button>
+  </div>
+</div>
+
+<!-- FOUNDER DASHBOARD -->
+<div class="dash-overlay" id="dashboard">
+  <div class="dash-wrap">
+    <div class="dash-hdr">
+      <h2 class="dash-title">Veil Dashboard</h2>
+      <button class="dash-close" onclick="closeDash()">Close</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><span class="stat-num" id="stat-veils">0</span><span class="stat-label">Total Veils Sent</span></div>
+      <div class="stat-card"><span class="stat-num" id="stat-matches">0</span><span class="stat-label">Matches Made</span></div>
+      <div class="stat-card"><span class="stat-num" id="stat-chats">0</span><span class="stat-label">Active Chats</span></div>
+    </div>
+    <p class="dash-sec-title">Recent Veils</p>
+    <div id="dash-list"></div>
+  </div>
+</div>
+
+<!-- LANDING -->
+<div id="landing">
+
+<nav id="nav">
+  <div class="nav-logo" id="nav-logo-click">
+    <svg width="26" height="26" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="200" cy="195" r="120" stroke="#c9a4b2" stroke-width="8" fill="none" stroke-dasharray="620 105" stroke-linecap="round" transform="rotate(-50 200 195)"/>
+      <circle cx="272" cy="97" r="12" fill="#c9a4b2"/>
+      <path d="M160 165 L200 230 L240 165" stroke="#c9a4b2" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    <span class="nav-logo-text">Veil</span>
+  </div>
+  <a href="#" class="nav-cta" onclick="openApp(event)" style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;background:var(--rose);color:#0d0814;padding:.5rem 1.1rem;text-decoration:none;border:1px solid var(--rose);transition:background .3s;">Open Veil</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+  <p class="hero-eyebrow">Anonymous · Secure · 24 hours · No usernames · Chat only</p>
+  <h1 class="hero-title">You've been<br><em>Veiled.</em></h1>
+  <p class="hero-tag">The anonymous chat service designed to connect people. Treat Veil as a random side quest. No consequences. Sends to any email.</p>
+  <div class="hero-btns">
+    <a href="#" class="btn-hero" onclick="openApp(event)">Send a Veil</a>
+    <a href="#how" class="btn-hero-ghost">How it works</a>
+  </div>
+  <div class="pills">
+    <span class="pill">confess to a crush</span>
+    <span class="pill">say hi to a friend</span>
+    <span class="pill">reconnect with someone</span>
+    <span class="pill">text someone just because</span>
+    <span class="pill">tell someone you miss them</span>
+  </div>
+  <p class="hero-origin">A startup originating from Cornell University · By students, for students · Est. 2026</p>
+</div>
+
+<!-- STAT -->
+<div class="sec-divider"></div>
+<div class="stat-section reveal">
+  <h2 class="stat-headline"><span>#1</span> Anonymous Chat Service</h2>
+  <p class="stat-sub">Designed to connect people. Every chat disappears in 24 hours. No archive. No trace. No usernames.</p>
+</div>
+
+<!-- AD ZONE 1 -->
+<div class="sec-divider"></div>
+<div class="ad-zone" style="padding:1rem 2rem;"><!-- Google AdSense leaderboard --></div>
+
+<!-- WHO IT'S FOR -->
+<div class="sec-divider"></div>
+<div class="sec-label"><span class="sec-label-text">Who it's for</span></div>
+<div class="section reveal" id="use-cases">
+  <h2 class="section-h">Every feeling you<br><em>couldn't say out loud.</em></h2>
+  <p class="section-p">Whether you are in a lecture hall, a Zoom meeting, or just thinking about someone. Veil gives you a way to reach out without the risk.</p>
+  <div class="use-grid">
+    <div class="use-card">
+      <div class="use-num">01</div>
+      <h3 class="use-title">The Crush</h3>
+      <p class="use-body">You see them every week. You have never said it. Send a Veil and wait.</p>
+    </div>
+    <div class="use-card">
+      <div class="use-num">02</div>
+      <h3 class="use-title">The Friend</h3>
+      <p class="use-body">Someone you see every day or have not spoken to in a while. A quiet signal is sometimes easier than a text that needs an explanation.</p>
+    </div>
+    <div class="use-card">
+      <div class="use-num">03</div>
+      <h3 class="use-title">The What If</h3>
+      <p class="use-body">Someone you have thought about more than once. Low stakes. Real. Send a signal and see what comes back.</p>
+    </div>
+    <div class="use-card">
+      <div class="use-num">04</div>
+      <h3 class="use-title">Just Because</h3>
+      <p class="use-body">Poke someone you have not talked to in years, or see every day. Start a random conversation. No reason needed.</p>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="sec-divider"></div>
+<div class="sec-label"><span class="sec-label-text">How it works</span></div>
+<div class="section reveal" id="how">
+  <h2 class="section-h">Simple steps.<br><em>Zero courage required.</em></h2>
+  <div class="info-box">
+    Enter the email of the person you want to Veil. <strong>Works with any email including .edu.</strong> They receive a secure link. A 24-hour chat opens when they respond. No pressure. No record. You can Veil the same person once every 48 hours. Your code name changes every time.
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">01</div>
+      <h3 class="step-title">Enter your email</h3>
+      <p class="step-body">No profile. No username. No photo. Just your email so the right Veil finds you.</p>
+    </div>
+    <div class="step">
+      <div class="step-n">02</div>
+      <h3 class="step-title">Send a Veil</h3>
+      <p class="step-body">Enter their email. Add a hint or stay fully anonymous. They receive a secure link and see: "You've been Veiled." They won't know who sent it. One Veil per person every 48 hours.</p>
+    </div>
+    <div class="step">
+      <div class="step-n">03</div>
+      <h3 class="step-title">You get a code name</h3>
+      <p class="step-body">The moment you send, you are assigned a random code name. Something like Velvet Raccoon or Midnight Waffle. Your code name changes every time you send a new Veil.</p>
+    </div>
+    <div class="step">
+      <div class="step-n">04</div>
+      <h3 class="step-title">They check their Veil</h3>
+      <p class="step-body">They open the link and see a Veil waiting with your code name. They can choose to Veil back or let it sit. No pressure either way.</p>
+    </div>
+    <div class="step">
+      <div class="step-n">05</div>
+      <h3 class="step-title">24-hour chat opens</h3>
+      <p class="step-body">When they Veil back, a private chat opens immediately. The 24-hour timer starts. What you say stays between you. After 24 hours the chat deletes itself completely.</p>
+    </div>
+    <div class="step">
+      <div class="step-n">06</div>
+      <h3 class="step-title">Lift the Veil</h3>
+      <p class="step-body">Inside the chat, either person can press "Lift the Veil." Both of you must press it within the 24-hour window to reveal each other's email. If only one presses, the mystery stays.</p>
+    </div>
+  </div>
+</div>
+
+<!-- BIG QUOTE -->
+<div class="sec-divider"></div>
+<div class="big-q-wrap reveal">
+  <p class="big-q">"Facebook had the Poke. We have <em>the Veil.</em> More mysterious. More secure. And it actually leads somewhere."</p>
+</div>
+
+<!-- GLOBE + GAP -->
+<div class="sec-divider"></div>
+<div class="globe-layout reveal">
+  <div style="flex-shrink:0;">
+    <svg width="260" height="260" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg" style="animation:globe-pulse 4s ease-in-out infinite;">
+      <circle cx="160" cy="160" r="130" fill="rgba(123,94,167,0.05)" stroke="rgba(123,94,167,0.25)" stroke-width="1.5"/>
+      <ellipse cx="160" cy="160" rx="130" ry="40" fill="none" stroke="rgba(123,94,167,0.13)" stroke-width="1"/>
+      <ellipse cx="160" cy="160" rx="130" ry="80" fill="none" stroke="rgba(123,94,167,0.1)" stroke-width="1"/>
+      <ellipse cx="160" cy="160" rx="40" ry="130" fill="none" stroke="rgba(123,94,167,0.13)" stroke-width="1"/>
+      <ellipse cx="160" cy="160" rx="80" ry="130" fill="none" stroke="rgba(123,94,167,0.1)" stroke-width="1"/>
+      <line x1="30" y1="160" x2="290" y2="160" stroke="rgba(123,94,167,0.18)" stroke-width="1"/>
+      <line x1="160" y1="30" x2="160" y2="290" stroke="rgba(123,94,167,0.18)" stroke-width="1"/>
+      <circle cx="160" cy="30" r="4" fill="#c9a4b2" opacity=".8"/>
+      <circle cx="255" cy="95" r="3" fill="#b49fd4" opacity=".7"/>
+      <circle cx="270" cy="190" r="4" fill="#c9a4b2" opacity=".6"/>
+      <circle cx="90" cy="255" r="4" fill="#c9a4b2" opacity=".7"/>
+      <circle cx="55" cy="150" r="3" fill="#b49fd4" opacity=".6"/>
+      <line x1="160" y1="30" x2="255" y2="95" stroke="rgba(201,164,178,0.18)" stroke-width="1" stroke-dasharray="4 4"/>
+      <line x1="255" y1="95" x2="270" y2="190" stroke="rgba(180,159,212,0.18)" stroke-width="1" stroke-dasharray="4 4"/>
+      <line x1="90" y1="255" x2="55" y2="150" stroke="rgba(201,164,178,0.18)" stroke-width="1" stroke-dasharray="4 4"/>
+      <circle cx="160" cy="155" r="35" stroke="#c9a4b2" stroke-width="2.5" fill="none" stroke-dasharray="170 28" stroke-linecap="round" transform="rotate(-50 160 155)"/>
+      <circle cx="182" cy="127" r="5" fill="#c9a4b2"/>
+      <path d="M148 148 L160 168 L172 148" stroke="#c9a4b2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+  </div>
+  <div class="globe-text">
+    <p style="font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--rose-dim);margin-bottom:1.2rem;">We found a gap. We are here to fix it.</p>
+    <h2 class="globe-title">Connection got harder.<br><em>Veil makes it easier.</em></h2>
+    <p style="font-size:.88rem;color:var(--fog);line-height:1.9;margin-bottom:1rem;">On a campus or in an office, it is easy to feel invisible. You see the same faces every day and want to reach out. Veil was built for that moment. A secure, anonymous chat service. Gone in 24 hours. No usernames. No pressure.</p>
+    <p style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-style:italic;color:var(--purple-light);">Let's change the social scene, together.</p>
+  </div>
+</div>
+
+<!-- AD ZONE 2 -->
+<div class="sec-divider"></div>
+<div class="ad-zone" style="padding:1rem 2rem;"><!-- Google AdSense rectangle --></div>
+
+<!-- ABOUT -->
+<div class="sec-divider"></div>
+<div class="sec-label"><span class="sec-label-text">About Veil</span></div>
+<div class="section reveal" id="about">
+  <div class="about-grid">
+    <div>
+      <div style="text-align:center;margin-bottom:1.8rem;cursor:pointer;" id="founder-pic">
+        <svg width="110" height="130" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="38" r="26" fill="rgba(123,94,167,0.12)" stroke="rgba(123,94,167,0.3)" stroke-width="1.5"/>
+          <circle cx="60" cy="38" r="18" stroke="rgba(201,164,178,0.3)" stroke-width="1" fill="rgba(201,164,178,0.04)" stroke-dasharray="8 4"/>
+          <path d="M18 140 C18 105 35 90 60 88 C85 90 102 105 102 140" fill="rgba(123,94,167,0.1)" stroke="rgba(123,94,167,0.25)" stroke-width="1.5"/>
+          <text x="60" y="44" text-anchor="middle" fill="rgba(201,164,178,0.5)" font-size="16" font-family="Georgia,serif">?</text>
+          <circle cx="88" cy="15" r="4" fill="#c9a4b2" opacity=".7"/>
+          <circle cx="35" cy="10" r="2.5" fill="#b49fd4" opacity=".5"/>
+        </svg>
+      </div>
+      <p class="founder-attr">Founded by an anonymous founder at <strong>Cornell University.</strong></p>
+      <span class="by-tag">By students, for students.</span>
+    </div>
+    <div>
+      <p style="font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--rose-dim);margin-bottom:1.2rem;">The idea</p>
+      <div class="story-box">
+        <p>The Poke was ambiguous by design. Zuckerberg himself described it that way. It became one of the most iconic features of early social media not because of what it did, but because of what it implied. A way to say something without saying anything.</p>
+        <p>But that was 2004. Today every platform asks you to perform. To post, to follow, to be visible. The quiet signal got lost.</p>
+        <p>Veil is that signal back. Secure. Anonymous. And it actually leads somewhere real. You should not be afraid of rejection because nothing is ever attached to your name unless you want it to be.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POLICY -->
+<div class="sec-divider"></div>
+<div class="sec-label"><span class="sec-label-text">Community Standards</span></div>
+<div class="section reveal" style="padding-top:3rem;">
+  <div class="policy-grid">
+    <div>
+      <h3 class="policy-title">Veil is a safe space.<br>Keep it that way.</h3>
+      <p class="policy-body">Anonymity is a privilege. Use it to connect, not to harm. Veil is a chat only service by design.</p>
+    </div>
+    <div>
+      <div class="policy-rule"><div class="policy-dot"></div>No hate speech of any kind. You will be banned.</div>
+      <div class="policy-rule"><div class="policy-dot"></div>No harassment or threats. You will be banned.</div>
+      <div class="policy-rule"><div class="policy-dot"></div>No explicit or harmful content. You will be banned.</div>
+      <div class="policy-rule"><div class="policy-dot"></div>Don't ruin the fun.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TEAM -->
+<div class="sec-divider"></div>
+<div class="sec-label"><span class="sec-label-text">Join the Team</span></div>
+<div class="section reveal" id="team">
+  <div class="team-grid">
+    <div>
+      <h2 class="section-h">Join to create<br><em>real change.</em></h2>
+      <p class="section-p" style="margin-bottom:2rem;">We are always looking for campus ambassadors at every university. We are hiring for the following roles.</p>
+      <div class="team-roles">
+        <div class="team-role"><div class="role-dot"></div>Software Engineer</div>
+        <div class="team-role"><div class="role-dot"></div>Campus Ambassador (All Universities Welcome)</div>
+        <div class="team-role"><div class="role-dot"></div>Advisor</div>
+        <div class="team-role"><div class="role-dot"></div>Open role. Pitch us.</div>
+      </div>
+    </div>
+    <div>
+      <div class="contact-card">
+        <span class="contact-label">Get in touch</span>
+        <div class="contact-qs">
+          <p class="contact-q">Questions?</p>
+          <p class="contact-q">Concerns?</p>
+          <p class="contact-q">Want to join the team?</p>
+        </div>
+        <p style="font-size:.76rem;color:var(--muted);line-height:1.8;margin-bottom:.5rem;">We read everything and respond personally.</p>
+        <a class="contact-email" href="mailto:joinveil.team@gmail.com">joinveil.team@gmail.com</a>
+      </div>
+      <div class="contact-card">
+        <span class="contact-label">For investors</span>
+        <p style="font-size:.8rem;color:var(--fog);line-height:1.8;margin-bottom:.5rem;">Veil is an early stage startup. If you are interested in investing or partnering, we would love to connect.</p>
+        <a class="contact-email" href="mailto:joinveil.team@gmail.com" style="color:var(--purple-light);">Reach out to invest</a>
+      </div>
+      <div class="contact-card">
+        <span class="contact-label">Advertise with Veil</span>
+        <p style="font-size:.8rem;color:var(--fog);line-height:1.8;margin-bottom:.5rem;">Interested in advertising your business to students and young professionals through Veil? We partner with brands through Google Ads.</p>
+        <a class="contact-email" href="mailto:joinveil.team@gmail.com" style="color:var(--purple-light);">Get in touch about ads</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AD ZONE 3 -->
+<div class="sec-divider"></div>
+<div class="ad-zone" style="padding:1rem 2rem;"><!-- Google AdSense footer banner --></div>
+
+<!-- FOOTER -->
+<div class="sec-divider"></div>
+<footer>
+  <div class="footer-top">
+    <div style="display:flex;align-items:center;gap:.7rem;">
+      <svg width="22" height="22" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="200" cy="195" r="120" stroke="#8a6070" stroke-width="8" fill="none" stroke-dasharray="620 105" stroke-linecap="round" transform="rotate(-50 200 195)"/>
+        <circle cx="272" cy="97" r="12" fill="#8a6070"/>
+        <path d="M160 165 L200 230 L240 165" stroke="#8a6070" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span class="footer-logo-text">Veil</span>
+      <a href="#" onclick="openApp(event)" style="font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--rose);text-decoration:none;transition:color .3s;margin-left:.3rem;">· Open Veil</a>
+    </div>
+    <p style="font-size:.6rem;color:var(--muted);margin-top:.3rem;">Est. 2026</p>
+  </div>
+  <p class="footer-legal">
+    Copyright 2026 Veil. All rights reserved. By students, for students. Veil is an anonymous chat service and startup. By using Veil, you agree that the platform may review chat content for safety, moderation, and compliance purposes. All chats automatically delete after 24 hours. Veil does not store personal information beyond what is required to deliver the service. Hate speech, harassment, and abusive content are strictly prohibited and will result in a permanent ban with no appeal. You may Veil the same person once every 48 hours. New Veils replace any previous pending Veil to the same person. Veil reserves the right to ban any user at any time. Use of this platform constitutes full acceptance of these terms. Questions: joinveil.team@gmail.com.
+  </p>
+</footer>
+
+</div><!-- /landing -->
+
+<!-- APP -->
+<div id="veil-app">
+<div class="app-wrap">
+  <div class="app-header">
+    <div class="app-logo-wrap">
+      <svg width="22" height="22" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="200" cy="195" r="120" stroke="#c9a4b2" stroke-width="8" fill="none" stroke-dasharray="620 105" stroke-linecap="round" transform="rotate(-50 200 195)"/>
+        <circle cx="272" cy="97" r="12" fill="#c9a4b2"/>
+        <path d="M160 165 L200 230 L240 165" stroke="#c9a4b2" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span class="app-logo-text">Veil</span>
+    </div>
+    <div class="app-hdr-right">
+      <span class="user-pill" id="user-pill"></span>
+      <button id="app-back" onclick="goBack()">Back</button>
+      <button class="close-app" onclick="closeApp()">close</button>
+    </div>
+  </div>
+
+  <div class="screen active" id="s-welcome">
+    <div class="welcome-wrap">
+      <h1 class="w-title">You've been<br><em>Veiled.</em></h1>
+      <p class="w-sub">Enter your email to send a Veil or check yours. Sends to any email including .edu.</p>
+      <div class="w-form">
+        <div class="inp-group">
+          <label class="label">Your email</label>
+          <input class="inp" type="email" id="my-email" placeholder="you@email.com" autocomplete="email">
+        </div>
+        <button class="btn btn-rose" onclick="enterApp()">Enter Veil</button>
+        <button class="btn btn-out" onclick="closeApp()">Back to site</button>
+        <p class="no-photo">Anonymous. Chat only. No usernames.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="s-home">
+    <h2 class="s-title">Your Veils</h2>
+    <p class="s-sub">Send a Veil. Check your inbox. No words required.</p>
+    <div id="my-codenames"></div>
+    <div class="card-grid">
+      <div class="home-card" onclick="go('send')">
+        <div class="card-icon">✦</div>
+        <div class="card-title">Send a Veil</div>
+        <div class="card-sub">Let someone know you are thinking of them</div>
+      </div>
+      <div class="home-card" id="inbox-card" onclick="go('inbox')">
+        <div class="card-icon">◐</div>
+        <div class="card-title">My Inbox</div>
+        <div class="card-sub">See who has Veiled you</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div id="home-chats"></div>
+  </div>
+
+  <div class="screen" id="s-send">
+    <div id="send-body">
+      <h2 class="s-title">Send a Veil</h2>
+      <p class="s-sub">They will receive a secure link and see your random code name. They will not know it is you. One Veil per person every 48 hours. Your code name changes every time.</p>
+      <div class="inp-group">
+        <label class="label">Their email (any email including .edu)</label>
+        <input class="inp" type="email" id="to-email" placeholder="them@email.com" autocomplete="off">
+      </div>
+      <div class="toggle-row" onclick="toggleHint()">
+        <div>
+          <span class="toggle-label">Add a hint</span>
+          <span class="toggle-sub">A clue to let them feel a little closer</span>
+        </div>
+        <div class="switch" id="hint-sw"><div class="knob"></div></div>
+      </div>
+      <div id="hint-wrap" style="display:none;">
+        <div class="inp-group">
+          <label class="label">Your hint <span style="color:var(--rose-dim);">(they will see this)</span></label>
+          <textarea class="inp" id="hint-txt" placeholder="we always sit near the windows in the library..." maxlength="120"></textarea>
+          <div class="char-count" id="char-c">0 / 120</div>
+        </div>
+      </div>
+
+      <button class="btn btn-rose" onclick="sendVeil()">Send Veil ✦</button>
+    </div>
+    <div id="send-ok" style="display:none;">
+      <div class="success-card">
+        <div class="success-icon">✦</div>
+        <div class="success-title">Veil sent.</div>
+        <div class="your-cn" id="sent-cn"></div>
+        <div class="success-body">That is your code name for this Veil. They will see it when they open their link. They will not know it is you unless you both press "Lift the Veil" inside the chat.</div>
+      </div>
+      <button class="btn btn-out" onclick="resetSend()">Send Another Veil</button>
+      <button class="btn btn-out" onclick="go('home')">Back to Home</button>
+    </div>
+  </div>
+
+  <div class="screen" id="s-inbox">
+    <h2 class="s-title">My Inbox</h2>
+    <p class="s-sub">Someone Veiled you. Veil them back to open a 24-hour chat.</p>
+    <div id="inbox-list"></div>
+  </div>
+
+  <div class="screen" id="s-chat" style="padding-bottom:0;">
+    <div class="chat-top">
+      <span class="chat-who" id="chat-cn-display">✦ Anonymous Veil</span>
+      <span class="chat-clock"><span class="clock-dot"></span><span id="chat-timer">--:--:--</span></span>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="chat-footer">
+      <div id="revealed-wrap"></div>
+      <div id="expired-wrap"></div>
+      <div class="reveal-strip" id="reveal-strip">
+        <div class="reveal-strip-top">
+          <span class="reveal-text">Ready to be known?</span>
+          <button class="lift-btn" id="lift-btn" onclick="liftVeil()">Lift the Veil</button>
+        </div>
+        <p class="reveal-note">Both of you must press this within the 24-hour window to reveal each other's email. If only one presses, the mystery stays.</p>
+      </div>
+      <div class="chat-in-row" id="input-row">
+        <textarea class="chat-ta" id="chat-in" placeholder="say something..." rows="1" onkeydown="onKey(event)"></textarea>
+        <button class="send-btn" onclick="sendMsg()">↑</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAkfxhFybvlbIg4bwjp6HDbyuI9fk5uh54",
+  authDomain: "veil-b6a81.firebaseapp.com",
+  databaseURL: "https://veil-b6a81-default-rtdb.firebaseio.com",
+  projectId: "veil-b6a81",
+  storageBucket: "veil-b6a81.firebasestorage.app",
+  messagingSenderId: "689375123122",
+  appId: "1:689375123122:web:69d7c5217d429771505bab",
+  measurementId: "G-RCJNWFT4J6"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+function fbRef(path){ return db.ref(path); }
+async function fbSet(path, data){ try{ await fbRef(path).set(data); }catch(e){ console.warn('FB write:', e); } }
+async function fbGet(path){ try{ const s=await fbRef(path).get(); return s.exists()?s.val():null; }catch(e){ return null; } }
+function fbListen(path, cb){ fbRef(path).on('value', s=>cb(s.exists()?s.val():null)); }
+
+const FOUNDER_PASSWORD = 'hi!ifyoufoundthisyouareveryimpressivesaycheesekarmaisreal12309174628';
+const RESEND_KEY = 're_SADSjc1o_Lvo8uhG6Cjnuo8UTpz9r638L';
+
+const ADJ=['Velvet','Midnight','Golden','Silver','Crimson','Cosmic','Misty','Wandering','Distant','Faded','Hushed','Luminous','Serene','Twilight','Frozen','Hidden','Languid','Lavender','Lingering','Lonely','Magnetic','Mossy','Radiant','Restless','Roaming','Secret','Shaded','Silent','Silken','Smoky','Timeless','Unnamed','Ancient','Broken','Burning','Careful','Endless','Fragile','Sneaky','Fuzzy','Clumsy','Grumpy','Spicy','Jumpy','Witty','Sassy','Wobbly','Funky','Goofy','Zesty','Peppy','Quirky','Sleepy','Bouncy','Cranky','Dizzy','Fancy','Fluffy','Giggly','Jazzy','Kooky','Lazy','Moody','Perky','Punchy','Rowdy','Salty','Shaky','Silly','Slinky','Snarky','Snazzy','Speedy','Spooky','Squirmy','Stealthy','Sticky','Stormy','Swaggy','Tangy','Toasty','Tricky','Wacky','Wiggly','Zippy','Breezy','Bubbly','Cheeky','Chilly','Chunky','Cozy','Crispy','Crunchy','Daring','Dashing','Dreamy','Edgy','Feisty','Fierce','Hollow','Tender'];
+const NOUN=['Raccoon','Waffle','Penguin','Pickle','Noodle','Muffin','Llama','Biscuit','Nugget','Pretzel','Bagel','Pancake','Sloth','Walrus','Panda','Gecko','Ferret','Hamster','Iguana','Koala','Lemur','Meerkat','Narwhal','Otter','Platypus','Toucan','Wombat','Axolotl','Capybara','Chinchilla','Flamingo','Hedgehog','Kiwi','Lobster','Manatee','Ocelot','Peacock','Quokka','Salamander','Velociraptor','Avocado','Broccoli','Calzone','Dumpling','Fritter','Gyoza','Hummus','Kebab','Lasagna','Macaron','Nougat','Papaya','Quinoa','Scone','Tempura','Udon','Brownie','Cannoli','Beignet','Churro','Falafel','Granola','Ramen','Sushi','Tiramisu','Croissant','Parfait','Stromboli','Boba','Echo','Ember','Storm','Spark','Tide','Song','Flame','Mist','Dusk','Dawn','Reef','Gust','Bloom','Creek','Cloud','Crane','Drift','Dune','Flare','Glow','Grove','Haze','Hymn','Iris','Lantern','Meadow','Mirror','Myth','Passage','Pearl','Petal','Phantom','Portal','Pulse'];
+function genCode(){return ADJ[Math.floor(Math.random()*ADJ.length)]+' '+NOUN[Math.floor(Math.random()*NOUN.length)];}
+
+let lc=0,lt=null;
+document.getElementById('founder-pic').addEventListener('click',()=>{
+  lc++;clearTimeout(lt);lt=setTimeout(()=>lc=0,3000);
+  if(lc>=6){lc=0;document.getElementById('pw-overlay').classList.add('show');setTimeout(()=>document.getElementById('pw-input').focus(),100);}
+});
+function checkPw(){
+  if(document.getElementById('pw-input').value===FOUNDER_PASSWORD){document.getElementById('pw-overlay').classList.remove('show');document.getElementById('pw-input').value='';document.getElementById('pw-error').style.display='none';openDash();}
+  else{document.getElementById('pw-error').style.display='block';}
+}
+function closePw(){document.getElementById('pw-overlay').classList.remove('show');document.getElementById('pw-input').value='';document.getElementById('pw-error').style.display='none';}
+
+async function openDash(){
+  const vs=await allVeils(),matched=vs.filter(s=>s.status==='matched'),active=matched.filter(s=>s.chatAt&&Date.now()-s.chatAt<W);
+  document.getElementById('stat-veils').textContent=vs.length;
+  document.getElementById('stat-matches').textContent=matched.length;
+  document.getElementById('stat-chats').textContent=active.length;
+  const list=document.getElementById('dash-list');
+  list.innerHTML=vs.length?vs.slice().reverse().slice(0,20).map(s=>`<div class="veil-log"><span style="color:var(--fog);">${esc(s.from)} to ${esc(s.to)}</span><span style="color:var(--purple-light);font-size:.7rem;">${esc(s.codeName||'')}</span><span class="${s.status==='matched'?'status-matched':'status-pending'}">${s.status}</span><span style="color:var(--muted);font-size:.65rem;">${ago(s.sentAt)}</span></div>`).join(''):'<div class="dash-empty">No Veils sent yet.</div>';
+  document.getElementById('dashboard').classList.add('show');
+}
+function closeDash(){document.getElementById('dashboard').classList.remove('show');}
+
+document.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',window.scrollY>60));
+const obs=new IntersectionObserver(entries=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*80);obs.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+function openApp(e){if(e)e.preventDefault();document.getElementById('landing').style.display='none';document.getElementById('veil-app').style.display='flex';}
+function closeApp(){document.getElementById('landing').style.display='block';document.getElementById('veil-app').style.display='none';}
+
+let ME='',hintOn=false,activeRoom=null,timerInt=null,pollInt=null,fromScr='home';
+const W=24*60*60*1000,WAIT=48*60*60*1000;
+
+// Firebase-backed data functions
+async function allVeils(){ const v=await fbGet('veils'); return v?Object.values(v):[]; }
+async function saveVeils(arr){
+  const obj={};
+  arr.forEach(v=>{ obj[v.id]=v; });
+  await fbSet('veils',obj);
+}
+function rid(a,b){return[a.toLowerCase().trim(),b.toLowerCase().trim()].sort().join('__');}
+async function getMsgs(r){ const m=await fbGet('messages/'+r); return m?Object.values(m):[]; }
+async function saveMsgs(r,arr){
+  const obj={};
+  arr.forEach((m,i)=>{ obj['m'+i]=m; });
+  await fbSet('messages/'+r,obj);
+}
+async function getRevs(r){ const v=await fbGet('reveals/'+r); return v||[]; }
+async function saveRevs(r,v){ await fbSet('reveals/'+r,v); }
+function ago(ts){const d=Date.now()-ts;if(d<60000)return 'just now';if(d<3600000)return Math.floor(d/60000)+'m ago';if(d<86400000)return Math.floor(d/3600000)+'h ago';return '1d+';}
+function cd(ms){if(ms<=0)return 'expired';const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);return`${p(h)}:${p(m)}:${p(s)}`;}
+function p(n){return String(n).padStart(2,'0');}
+function ft(ts){return new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function cleanExpired(){
+  const veils=await allVeils();
+  const vs=veils.filter(s=>{
+    if(s.status==='matched'&&s.chatAt&&Date.now()-s.chatAt>W){
+      fbSet('messages/'+s.rid, null);
+      fbSet('reveals/'+s.rid, null);
+      return false;
+    }
+    return true;
+  });
+  await saveVeils(vs);
+}
+
+function go(scr,back){
+  fromScr=back||'home';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+scr).classList.add('active');
+  const backBtn=document.getElementById('app-back');
+  if(scr==='welcome'||scr==='home'){
+    backBtn.style.display='none';
+  } else {
+    backBtn.style.display='inline-block';
+    backBtn.textContent='← Back';
+  }
+  if(scr==='home')renderHome();
+  if(scr==='inbox')renderInbox();
+  if(scr==='send'){resetSend();}
+  if(scr!=='chat'){clearInterval(timerInt);clearInterval(pollInt);activeRoom=null;}
+  window.scrollTo(0,0);
+}
+function goBack(){go(fromScr);}
+
+function enterApp(){
+  const em=document.getElementById('my-email').value.trim();
+  if(!em){alert('Enter your email.');return;}
+  ME=em.toLowerCase();
+  document.getElementById('user-pill').textContent='◐ '+ME.split('@')[0];
+  cleanExpired().then(()=>go('home'));
+}
+document.getElementById('my-email').addEventListener('keydown',e=>{if(e.key==='Enter')enterApp();});
+
+function toggleHint(){
+  hintOn=!hintOn;
+  document.getElementById('hint-sw').classList.toggle('on',hintOn);
+  document.getElementById('hint-wrap').style.display=hintOn?'block':'none';
+}
+document.getElementById('hint-txt').addEventListener('input',function(){document.getElementById('char-c').textContent=this.value.length+' / 120';});
+
+async function sendVeil(){
+  const to=document.getElementById('to-email').value.trim().toLowerCase();
+  if(!to){alert('Enter their email.');return;}
+  if(to===ME){alert("You can't Veil yourself.");return;}
+  const hint=hintOn?document.getElementById('hint-txt').value.trim():'';
+  const veils=await allVeils();
+  const last=veils.find(s=>s.from===ME&&s.to===to);
+  if(last&&Date.now()-last.sentAt<WAIT){
+    const hrs=Math.ceil((WAIT-(Date.now()-last.sentAt))/(60*60*1000));
+    alert(`You can Veil the same person once every 48 hours. Try again in ${hrs} hour${hrs!==1?'s':''}.`);return;
+  }
+  // Remove old pending Veil to same person and replace with new one
+  const filtered=veils.filter(s=>!(s.from===ME&&s.to===to&&s.status==='pending'));
+  const room=rid(ME,to),codeName=genCode();
+  const mutual=filtered.find(s=>s.from===to&&s.to===ME&&s.status==='pending');
+  const now=Date.now();
+  const nv={id:'v'+now,from:ME,to,hint,hasHint:hintOn,sentAt:now,status:mutual?'matched':'pending',chatAt:mutual?now:null,rid:room,codeName};
+  if(mutual){const idx=filtered.findIndex(s=>s.from===to&&s.to===ME&&s.status==='pending');if(idx>-1){filtered[idx].status='matched';filtered[idx].chatAt=now;}}
+  filtered.push(nv);
+  await saveVeils(filtered);
+  document.getElementById('sent-cn').textContent='You are: '+codeName;
+  try{
+    await fetch('/.netlify/functions/send-email',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({to, hint})
+    });
+  }catch(e){console.warn('[Veil] Email error:',e);}
+  document.getElementById('send-body').style.display='none';
+  document.getElementById('send-ok').style.display='block';
+}
+
+function resetSend(){
+  document.getElementById('to-email').value='';document.getElementById('hint-txt').value='';
+  document.getElementById('char-c').textContent='0 / 120';hintOn=false;
+  document.getElementById('hint-sw').classList.remove('on');
+  document.getElementById('hint-wrap').style.display='none';
+  document.getElementById('send-body').style.display='block';
+  document.getElementById('send-ok').style.display='none';
+}
+
+async function renderHome(){
+  const vs=await allVeils();
+  const nc=vs.filter(s=>s.to===ME&&s.status==='pending').length;
+  const card=document.getElementById('inbox-card');
+  const old=card.querySelector('.notif-badge');if(old)old.remove();
+  if(nc>0){const b=document.createElement('div');b.className='notif-badge';b.textContent=nc;card.appendChild(b);}
+  const myP=vs.filter(s=>s.from===ME&&s.status==='pending'&&Date.now()-s.sentAt<W);
+  document.getElementById('my-codenames').innerHTML=myP.length?myP.map(s=>`<div class="codename-banner"><span class="cn-label">You are known as</span><span class="cn-value">${esc(s.codeName)}</span><span class="cn-to">to ${esc(s.to.split('@')[0])}</span></div>`).join(''):'';
+  const seen=new Set();
+  const chats=vs.filter(s=>s.status==='matched'&&(s.from===ME||s.to===ME)&&!seen.has(s.rid)&&seen.add(s.rid));
+  const wrap=document.getElementById('home-chats');
+  if(!chats.length){wrap.innerHTML='';return;}
+  wrap.innerHTML='<p class="s-sub" style="margin-bottom:.8rem;">Active chats</p>'+chats.map(s=>{
+    const ex=s.chatAt&&Date.now()-s.chatAt>W,left=s.chatAt?Math.max(0,W-(Date.now()-s.chatAt)):0,mc=getMsgs(s.rid).length;
+    return`<div class="veil-item" onclick="openChat('${s.rid}')" style="cursor:pointer;"><div class="item-cn">${esc(s.codeName||'Anonymous')}</div><div class="item-row"><div class="sdot ${ex?'sdot-e':'sdot-m'}"></div><span class="item-title">Anonymous chat</span><span class="item-time">${ex?'expired':cd(left)}</span></div><div style="font-size:.7rem;color:var(--muted);">${mc} message${mc!==1?'s':''} · tap to open</div></div>`;
+  }).join('');
+}
+
+async function renderInbox(){
+  const vsAll=await allVeils(); const vs=vsAll.filter(s=>s.to===ME);
+  const list=document.getElementById('inbox-list');
+  if(!vs.length){list.innerHTML=`<div class="empty"><div class="empty-icon">◐</div><p class="empty-text">No one has Veiled you yet.<br>Share your email and wait.</p></div>`;return;}
+  list.innerHTML=vs.map(s=>{
+    const m=s.status==='matched',ex=m&&s.chatAt&&Date.now()-s.chatAt>W,left=m&&s.chatAt?Math.max(0,W-(Date.now()-s.chatAt)):0;
+    return`<div class="veil-item"><div class="item-cn">${esc(s.codeName||'Unknown')}</div><div class="item-row"><div class="sdot ${m?(ex?'sdot-e':'sdot-m'):'sdot-p'}"></div><span class="item-title">${m?(ex?'Chat expired':'Matched · chat open'):'Veiled you'}</span><span class="item-time">${ago(s.sentAt)}</span></div>${s.hasHint&&s.hint?`<div class="hint-block">"${esc(s.hint)}"</div>`:`<div style="font-size:.7rem;color:var(--muted);margin-bottom:.6rem;font-style:italic;">No hint. Fully anonymous.</div>`}<div class="item-actions">${m&&!ex?`<button class="btn btn-rose btn-sm" onclick="openChat('${s.rid}')">Open Chat · ${cd(left)}</button>`:''}${m&&ex?`<span style="font-size:.7rem;color:var(--muted);">Window closed. No record remains.</span>`:''}${!m?`<button class="btn btn-rose btn-sm" onclick="veilBack('${s.id}','${s.from}','${s.rid}')">Veil Back</button>`:''}</div></div>`;
+  }).join('');
+}
+
+async function veilBack(sid,from,room){
+  const vs=await allVeils();const now=Date.now();
+  const orig=vs.find(s=>s.id===sid);if(!orig)return;
+  orig.status='matched';orig.chatAt=now;
+  vs.push({id:'v'+now+'b',from:ME,to:from,hint:'',hasHint:false,sentAt:now,status:'matched',chatAt:now,rid:room,codeName:genCode()});
+  await saveVeils(vs);renderInbox();setTimeout(()=>openChat(room),200);
+}
+
+async function openChat(room){
+  const vs=await allVeils();
+  const s=vs.find(sp=>sp.rid===room&&sp.status==='matched');if(!s)return;
+  activeRoom={rid:room,chatAt:s.chatAt,codeName:s.codeName};
+  go('chat','home');
+  const el=document.getElementById('chat-cn-display');if(el)el.textContent='✦ '+(s.codeName||'Anonymous');
+  renderChat();
+  clearInterval(pollInt);pollInt=setInterval(()=>renderMsgs(),2000);
+  clearInterval(timerInt);timerInt=setInterval(()=>{
+    if(!activeRoom)return;
+    const left=W-(Date.now()-activeRoom.chatAt);
+    const el=document.getElementById('chat-timer');if(el)el.textContent=cd(left);
+    if(left<=0){clearInterval(timerInt);renderMsgs();}
+  },1000);
+}
+function renderChat(){renderMsgs();}
+async function renderMsgs(){
+  if(!activeRoom)return;
+  const{rid,chatAt}=activeRoom,ex=Date.now()-chatAt>W,ms=await getMsgs(rid),revs=await getRevs(rid),bothRev=revs.length>=2,iRev=revs.includes(ME);
+  const con=document.getElementById('messages');if(!con)return;
+  con.innerHTML=ms.length?ms.map(m=>`<div class="msg ${m.from===ME?'msg-out':'msg-in'}">${esc(m.text)}<span class="msg-time">${ft(m.sentAt)}</span></div>`).join(''):`<div class="empty"><div class="empty-icon" style="font-size:1.5rem;">✦</div><p class="empty-text">The chat is open.<br>Say something.</p></div>`;
+  con.scrollTop=con.scrollHeight;
+  const rw=document.getElementById('revealed-wrap'),rs=document.getElementById('reveal-strip'),lb=document.getElementById('lift-btn');
+  if(bothRev){
+    const other=revs.find(r=>r!==ME);
+    rw.innerHTML=`<div class="revealed-card"><div class="revealed-label">The Veil is lifted ✦</div><div class="revealed-val">${esc(other)}</div><div style="font-size:.68rem;color:var(--muted);margin-top:.3rem;">You both chose to be known.</div></div>`;
+    rs.style.display='none';
+  } else {
+    rs.style.display='block';
+    if(lb){if(iRev){lb.textContent='Waiting for them...';lb.classList.add('pressed');}else{lb.textContent='Lift the Veil';lb.classList.remove('pressed');}}
+  }
+  const ew=document.getElementById('expired-wrap'),ir=document.getElementById('input-row');
+  if(ex){ew.innerHTML=`<div class="expired-banner">This conversation has closed. The 24-hour window has passed. No record remains.</div>`;ir.style.display='none';rs.style.display='none';}
+  else{ew.innerHTML='';ir.style.display='flex';}
+}
+async function sendMsg(){
+  const el=document.getElementById('chat-in'),text=el.value.trim();
+  if(!text||!activeRoom||Date.now()-activeRoom.chatAt>W)return;
+  const ms=await getMsgs(activeRoom.rid);ms.push({from:ME,text,sentAt:Date.now()});
+  await saveMsgs(activeRoom.rid,ms);el.value='';renderMsgs();
+}
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+async function liftVeil(){
+  if(!activeRoom)return;
+  const revs=await getRevs(activeRoom.rid);
+  if(!revs.includes(ME)){revs.push(ME);await saveRevs(activeRoom.rid,revs);}
+  renderMsgs();
+}
+</script>
+</body>
+</html>
